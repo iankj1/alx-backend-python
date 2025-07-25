@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 """
 Django settings for messaging_app project.
 
@@ -99,3 +100,10 @@ STATIC_URL = 'static/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+=======
+INSTALLED_APPS = [
+    ...
+    'rest_framework',
+    'chats',
+]
+>>>>>>> 5618ed877a5142ca4dd95da7a99bfeaba0c87963
