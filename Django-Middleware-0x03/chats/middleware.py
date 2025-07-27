@@ -1,77 +1,56 @@
+import os
+from datetime import datetime
 import logging
-from datetime import datetime, timedelta
 from django.http import JsonResponse
 
-# Store request counts for rate limiting: { ip_address: [datetime1, datetime2, ...] }
-request_counts = {}
+# Setup logging
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LOG_FILE = os.path.join(BASE_DIR, 'requests.log')
+logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
 
-# ---------------------------------------------
-# Middleware 1: Logs all user requests
-# ---------------------------------------------
 class RequestLoggingMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
-        logging.basicConfig(
-            filename='requests.log',
-            level=logging.INFO,
-            format='%(message)s'
-        )
 
     def __call__(self, request):
-        user = request.user if request.user.is_authenticated else 'Anonymous'
-        log_message = f"{datetime.now()} - User: {user} - Path: {request.path}"
+        response = self.get_response(request)
+        log_message = f"{datetime.now()} - {request.method} request to {request.path}"
         logging.info(log_message)
-        return self.get_response(request)
+        return response
 
-# ---------------------------------------------
-# Middleware 2: Restrict chat access between 6PM and 9PM only
-# ---------------------------------------------
+
 class RestrictAccessByTimeMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        now = datetime.now().time()
-        if request.path.startswith("/chat") or request.path.startswith("/messages"):
-            # Allow access only between 6PM (18:00) and 9PM (21:00)
-            if not (datetime.strptime("18:00", "%H:%M").time() <= now <= datetime.strptime("21:00", "%H:%M").time()):
-                return JsonResponse(
-                    {"error": "Chat access is allowed only between 6PM and 9PM."},
-                    status=403
-                )
+        current_hour = datetime.now().hour
+        if current_hour < 18 or current_hour >= 21:
+            return JsonResponse({'error': 'Chat access is restricted during this time.'}, status=403)
         return self.get_response(request)
 
-# ---------------------------------------------
-# Middleware 3: Limit POST requests (chat messages) to 5 per minute per IP
-# ---------------------------------------------
+
 class OffensiveLanguageMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.offensive_words = ['badword1', 'badword2', 'offensiveword']
+
+    def __call__(self, request):
+        if request.method == 'POST':
+            for word in self.offensive_words:
+                if word in str(request.body.decode('utf-8')).lower():
+                    return JsonResponse({'error': 'Offensive language is not allowed.'}, status=400)
+        return self.get_response(request)
+
+
+class RolePermissionMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.method == "POST":
-            ip = self.get_client_ip(request)
-            now = datetime.now()
-
-            # Remove timestamps older than 1 minute
-            timestamps = request_counts.get(ip, [])
-            timestamps = [ts for ts in timestamps if now - ts < timedelta(minutes=1)]
-
-            # Append current timestamp
-            timestamps.append(now)
-            request_counts[ip] = timestamps
-
-            # Check if limit exceeded
-            if len(timestamps) > 5:
-                return JsonResponse(
-                    {"error": "Too many messages. Please wait a minute."},
-                    status=429
-                )
-
+        user = request.user
+        if user.is_authenticated:
+            role = getattr(user, 'role', None)
+            if role not in ['admin', 'moderator']:
+                return JsonResponse({'error': 'Forbidden: Insufficient permissions'}, status=403)
         return self.get_response(request)
-
-    def get_client_ip(self, request):
-        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            return x_forwarded_for.split(',')[0]
-        return request.META.get('REMOTE_ADDR')
