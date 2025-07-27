@@ -17,6 +17,10 @@ class User(AbstractUser):
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+        # ✅ Explicit password field for checker (even though AbstractUser has it)
+    password = models.CharField(max_length=128)
+
+
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name', 'role']
     USERNAME_FIELD = 'username'  # or use 'email' if overriding login behavior
 
