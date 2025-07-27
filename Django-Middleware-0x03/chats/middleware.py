@@ -16,6 +16,4 @@ class RequestLoggingMiddleware:
         user = request.user if request.user.is_authenticated else 'Anonymous'
         log_message = f"{datetime.now()} - User: {user} - Path: {request.path}"
         logging.info(log_message)
-
-        response = self.get_response(request)
-        return response
+        return self.get_response(request)
