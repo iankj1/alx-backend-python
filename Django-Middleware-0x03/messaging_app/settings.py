@@ -57,8 +57,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-    # ✅ Add your middleware at the end or top
-    'chats.middleware.RequestLoggingMiddleware',
+    'chats.middleware.RequestLoggingMiddleware',  # ✅ Must be exactly like this
 ]
 
 
