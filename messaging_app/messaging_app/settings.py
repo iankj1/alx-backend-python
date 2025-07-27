@@ -59,6 +59,7 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
     'DEFAULT_PAGINATION_CLASS': 'chats.pagination.MessagePagination',
+'PAGE_NUMBER_PAGINATION': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
 }
 
