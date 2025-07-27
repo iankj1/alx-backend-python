@@ -62,11 +62,6 @@ MIDDLEWARE = [
 ]
 
 
-
-EWARE = [
-    
-]
-
 ROOT_URLCONF = 'messaging_app.urls'
 
 TEMPLATES = [
