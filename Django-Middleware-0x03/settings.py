@@ -27,7 +27,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'chats',
 ]
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2b4d62f (Final fixes: restructure project, fix middleware)
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -44,6 +47,10 @@ MIDDLEWARE = [
     'chats.middleware.RolepermissionMiddleware',
 ]
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2b4d62f (Final fixes: restructure project, fix middleware)
 ROOT_URLCONF = 'messaging_app.urls'
 
 TEMPLATES = [
