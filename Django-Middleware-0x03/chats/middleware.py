@@ -1,13 +1,15 @@
-# chats/middleware.py
-
-import logging
+import os
 from datetime import datetime
+import logging
 
-# Configure logging
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+log_path = os.path.join(BASE_DIR, 'requests.log')
+
 logging.basicConfig(
-    filename='requests.log',
+    filename=log_path,
     level=logging.INFO,
-    format='%(message)s'
+    format='%(asctime)s - %(message)s',
 )
 
 class RequestLoggingMiddleware:
@@ -16,8 +18,5 @@ class RequestLoggingMiddleware:
 
     def __call__(self, request):
         user = request.user if request.user.is_authenticated else 'Anonymous'
-        log_entry = f"{datetime.now()} - User: {user} - Path: {request.path}"
-        logging.info(log_entry)
-
-        response = self.get_response(request)
-        return response
+        logging.info(f"{datetime.now()} - User: {user} - Path: {request.path}")
+        return self.get_response(request)
