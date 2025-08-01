@@ -30,8 +30,12 @@ def log_message_edit(sender, instance, **kwargs):
 # 3. Clean up user-related data after account deletion
 @receiver(post_delete, sender=User)
 def delete_user_related_data(sender, instance, **kwargs):
-    # Clean up MessageHistory entries where the user was the editor
-    MessageHistory.objects.filter(edited_by=instance).delete()
+    # 1. Delete messages sent or received
+    Message.objects.filter(sender=instance).delete()
+    Message.objects.filter(receiver=instance).delete()
 
-    # Messages and Notifications are automatically deleted via CASCADE
-    # No need to manually delete them unless custom logic is needed
+    # 2. Delete notifications
+    Notification.objects.filter(user=instance).delete()
+
+    # 3. Delete edit histories edited by the user
+    MessageHistory.objects.filter(edited_by=instance).delete()
