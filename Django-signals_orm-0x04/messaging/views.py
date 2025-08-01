@@ -19,3 +19,11 @@ def threaded_messages_view(request):
         'messages': top_messages
     }
     return render(request, 'messaging/threaded_messages.html', context)
+
+# ✅ NEW: For unread messages using the custom manager
+@login_required
+def unread_messages_view(request):
+    unread_msgs = Message.unread.unread_for_user(request.user)
+    return render(request, 'messaging/unread_messages.html', {
+        'unread_messages': unread_msgs
+    })
