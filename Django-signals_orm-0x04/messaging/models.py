@@ -7,9 +7,26 @@ class Message(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     edited = models.BooleanField(default=False)
+    
+    # 🔁 Threaded replies (self-referential FK)
+    parent_message = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name='replies'
+    )
 
     def __str__(self):
         return f"From {self.sender} to {self.receiver} at {self.timestamp}"
+
+    def get_thread(self):
+        """Recursively retrieve all replies in this message thread."""
+        thread = []
+        for reply in self.replies.all().order_by('timestamp'):
+            thread.append(reply)
+            thread.extend(reply.get_thread())
+        return thread
 
 
 class Notification(models.Model):
