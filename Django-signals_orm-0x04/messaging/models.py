@@ -21,7 +21,6 @@ class Message(models.Model):
         return f"From {self.sender} to {self.receiver} at {self.timestamp}"
 
     def get_thread(self):
-        """Recursively retrieve all replies in this message thread."""
         thread = []
         for reply in self.replies.all().order_by('timestamp'):
             thread.append(reply)
