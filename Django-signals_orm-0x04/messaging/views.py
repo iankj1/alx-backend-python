@@ -23,7 +23,7 @@ def threaded_messages_view(request):
 # ✅ NEW: For unread messages using the custom manager
 @login_required
 def unread_messages_view(request):
-    unread_msgs = Message.unread.unread_for_user(request.user)
+    unread_msgs = Message.unread.unread_for_user(request.user).only('id', 'subject', 'sender', 'timestamp')
     return render(request, 'messaging/unread_messages.html', {
         'unread_messages': unread_msgs
     })
