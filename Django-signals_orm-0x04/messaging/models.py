@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from .managers import UnreadMessagesManager
 
 class UnreadMessagesManager(models.Manager):
     def for_user(self, user):
@@ -19,6 +20,9 @@ class Message(models.Model):
 
     objects = models.Manager()  # default manager
     unread = UnreadMessagesManager()  # custom manager for unread messages
+
+def __str__(self):
+        return f'From {self.sender} to {self.receiver}: {self.content[:20]}'
     
     # 🔁 Threaded replies (self-referential FK)
     parent_message = models.ForeignKey(
@@ -38,10 +42,6 @@ class Message(models.Model):
             thread.append(reply)
             thread.extend(reply.get_thread())
         return thread
-
-    
-def __str__(self):
-        return f'From {self.sender} to {self.receiver}: {self.content[:20]}'
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
